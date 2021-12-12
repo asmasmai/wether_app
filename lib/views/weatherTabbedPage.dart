@@ -1,28 +1,21 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:weather_app/models/location.dart';
 import 'package:weather_app/views/weatherPage.dart';
 
 class WeatherTabbedPage extends StatefulWidget {
-  final List<Location> locations;
-  final BuildContext context;
-  const WeatherTabbedPage(this.locations, this.context);
   @override
-  __WeatherTabbedPage createState() =>
-      __WeatherTabbedPage(this.locations, this.context);
+  __WeatherTabbedPage createState() => __WeatherTabbedPage();
 }
 
 class __WeatherTabbedPage extends State<WeatherTabbedPage> {
-  final List<Location> locations;
-  final Location location;
-  final BuildContext context;
-  __WeatherTabbedPage(List<Location> locations, BuildContext context)
-      : this.locations = locations,
-        this.context = context,
-        this.location = locations[0];
+  final List<Location> locations = new List<Location>();
   @override
   void initState() {
     super.initState();
+    initLocation();
   }
 
   @override
@@ -48,8 +41,7 @@ class __WeatherTabbedPage extends State<WeatherTabbedPage> {
                         onPressed: () {
                           showSearch(
                               context: context,
-                              delegate:
-                                  WeaatherCitiesSearch(location, locations));
+                              delegate: WeaatherCitiesSearch(locations));
                         })
                   ],
                   title: Text(
@@ -72,11 +64,17 @@ class __WeatherTabbedPage extends State<WeatherTabbedPage> {
                   child: TabBarView(
                     children: <Widget>[
                       WeatherPage(
-                          this.locations, this.context, this.locations[0]),
+                          this.context,
+                          locations.firstWhere(
+                              (element) => element.city == "Rio de Janeiro")),
                       WeatherPage(
-                          this.locations, this.context, this.locations[1]),
+                          this.context,
+                          locations.firstWhere(
+                              (element) => element.city == "Beijing")),
                       WeatherPage(
-                          this.locations, this.context, this.locations[2]),
+                          this.context,
+                          locations.firstWhere(
+                              (element) => element.city == "Los Angeles")),
                     ],
                   ),
                 ),
@@ -85,13 +83,25 @@ class __WeatherTabbedPage extends State<WeatherTabbedPage> {
           ),
         ));
   }
+
+  Future initLocation() async {
+    // Fetch data from csv file
+    final linesData =
+        File("/Users/asma/Projects/flutter/weather_app/assets/Cities.csv")
+            .readAsLinesSync()
+            .skip(1)
+            .toList();
+    for (var line in linesData) {
+      final data = line.split(',');
+      locations.add(Location.fromCsv(data));
+    }
+  }
 }
 
 // Cities search
 class WeaatherCitiesSearch extends SearchDelegate<String> {
   final List<Location> locations;
-  final Location location;
-  WeaatherCitiesSearch(this.location, this.locations);
+  WeaatherCitiesSearch(this.locations);
 
   @override
   List<Widget> buildActions(BuildContext context) {
@@ -116,11 +126,14 @@ class WeaatherCitiesSearch extends SearchDelegate<String> {
 
   @override
   Widget buildResults(BuildContext context) {
-    return WeatherPage(locations, context, location);
+    var searchedLocation =
+        locations.firstWhere((element) => element.city == query);
+    return WeatherPage(context, searchedLocation);
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
+    // Display suggestionList For search
     final sugggestionCitiesList = locations
         .map((value) => value.city)
         .toList()

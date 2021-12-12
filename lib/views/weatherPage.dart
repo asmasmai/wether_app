@@ -7,23 +7,18 @@ import 'package:weather_app/models/forcast.dart';
 import 'package:weather_app/models/location.dart';
 
 class WeatherPage extends StatefulWidget {
-  final List<Location> locations;
   final BuildContext context;
   final Location location;
-  const WeatherPage(this.locations, this.context, this.location);
+  const WeatherPage(this.context, this.location);
   @override
-  _WeatherPage createState() =>
-      _WeatherPage(this.locations, this.context, this.location);
+  _WeatherPage createState() => _WeatherPage(this.context, this.location);
 }
 
 class _WeatherPage extends State<WeatherPage> {
-  final List<Location> locations;
   final Location location;
   final BuildContext context;
-  _WeatherPage(
-      List<Location> locations, BuildContext context, Location location)
-      : this.locations = locations,
-        this.context = context,
+  _WeatherPage(BuildContext context, Location location)
+      : this.context = context,
         this.location = location;
 
   @override
